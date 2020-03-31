@@ -1,3 +1,10 @@
+"""
+Game by Sankti Goździelewski
+    github.com/Sankti
+Tiles by VECTORPIXELSTAR
+    vectorpixelstar.itch.io
+Made in Cracow, March - April 2020
+"""
 import pygame
 from pygame.locals import *
 from settings import *
@@ -51,7 +58,7 @@ class Cursor():
     def __init__(self, selection):
         self.selection = selection
 
-# Setting up cursor display positions
+# Setting up cursor display position
 menu_cursor = Cursor(0)
 
 def buttonDisplay():
@@ -142,15 +149,94 @@ def creditsMenu():
 class Tile():
     """
     Tiles which are used to draw level maps.
-    passable: boolean, if the tile can be stepped on or not.
+    row - int, position on x axis
+    column - int, position on y axis
+    passable - boolean, if the tile can be stepped on or not.
     """
-    def __init__(self, passable=False):
+    def __init__(self, row, column, passable=False):
+        self.row = row
+        self.column = column
         self.passable = passable
 
-def game():
+class Player():
+    """
+    Defines starting position and later positions of the player.
+    row - int, position on x axis
+    column - int, position on y axis
+    """
+    def __init__(self, row, column):
+        self.row = int(row)
+        self.column = int(column)
+
+    def move(self, direction):
+        if direction == "UP":
+            if self.row > 0 and self.collision("UP") == False:
+                self.row -= 1
+
+        elif direction == "LEFT":
+            if self.column > 0 and self.collision("LEFT") == False:
+                self.column -= 1
+
+        elif direction == "RIGHT":
+            if self.column < GRID_WIDTH - 1 and self.collision("RIGHT") == False:
+                self.column += 1
+
+        elif direction == "DOWN":
+            if self.row < GRID_HEIGHT - 1 and self.collision("DOWN") == False:
+                self.row += 1
+
+        level.update()
+
+    def collision(self, direction):
+        if direction == "UP":
+            pass
+        elif direction == "LEFT":
+            pass
+        elif direction == "RIGHT":
+            pass
+        elif direction == "DOWN":
+            pass
+        return False
+
+class Level():
+    grid = []
+
+    for row in range(GRID_HEIGHT):
+        grid.append([])
+        for column in range(GRID_HEIGHT):
+            grid[row].append([])
+
+    for row in range(GRID_HEIGHT):
+        for column in range(GRID_HEIGHT):
+            tile = Tile(column, row, True)
+            grid[column][row].append(tile)
+    
+    player = Player(2, 2)
+
+    def update(self):
+        pass
+
+class Game():
+    """
+    Used for loading levels of the game.
+    """
+    def __init__(self):
+        self.level = 0
+    
+    def draw_grid(self):
+        for x in range (0, WIDTH, TILESIZE):
+            pygame.draw.line(ROOT, GRAY, (x, 0), (x, HEIGHT))
+        for y in range(0, HEIGHT, TILESIZE):
+            pygame.draw.line(ROOT, GRAY, (0, y), (WIDTH, y))
+
+# Creating game instance
+game = Game()
+
+def beginGame():
     chooseDisplay(screen_game)
     ROOT.fill(BLACK)
-
+    
+    game.draw_grid()
 
 # COMMENCING LOOP, getting key input
 startMenu()
@@ -183,7 +269,7 @@ while True:
 
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if menu_cursor.selection == 0:
-                pass
+                beginGame()
             elif menu_cursor.selection == 1:
                 tutorial()
             elif menu_cursor.selection == 2:
