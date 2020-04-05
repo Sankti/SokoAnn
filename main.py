@@ -1,8 +1,6 @@
 """
 Game by Sankti Goździelewski
     github.com/Sankti
-Tiles by VECTORPIXELSTAR
-    vectorpixelstar.itch.io
 Made in Cracow, March - April 2020
 """
 import pygame
@@ -289,5 +287,3 @@ while True:
             
     pygame.display.update()
     fpsClock.tick(FPS)
-
-startMenu()
