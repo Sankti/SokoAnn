@@ -3,14 +3,16 @@ Game by Sankti Goździelewski
     github.com/Sankti
 Made in Cracow, March - April 2020
 """
-import pygame
+import pygame, sys
 from pygame.locals import *
 from settings import *
+from engine import *
 
 # PYGAME Initialization
 pygame.init()
 ROOT = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("SokoAnn")
+KEYS = pygame.key.get_pressed()
 
 # Fonts
 font_large = pygame.font.SysFont("monospace", 48)
@@ -30,6 +32,17 @@ screen_menu = Screen()
 screen_game = Screen()
 screen_tutorial = Screen()
 screen_credits = Screen()
+
+def logoDisplay(clock):
+    display = True
+    while display == True:
+        logo = pygame.image.load('logo.png').convert()
+        start_time = pygame.time.get_ticks()
+        while pygame.time.get_ticks() < start_time + 1000:
+            ROOT.fill(WHITE)
+            ROOT.blit(logo, (TEXT_INDENT / 4, 50))
+            pygame.display.update()
+        display = False
 
 def chooseDisplay(screen):
     """
@@ -75,7 +88,7 @@ def startMenu():
     chooseDisplay(screen_menu)
     ROOT.fill(BLACK)
     
-    title = font_large.render("SecretProject", 1, WHITE)
+    title = font_large.render("Secret Project", 1, WHITE)
     author = font_small.render("©2020 Sankti Goździelewski", 1, WHITE)
 
     # Buttons TO BE MADE
@@ -144,99 +157,14 @@ def creditsMenu():
     ROOT.blit(line5, (TEXT_INDENT, 325))
     ROOT.blit(info, (TEXT_INDENT, 350))
 
-class Tile():
-    """
-    Tiles which are used to draw level maps.
-    row - int, position on x axis
-    column - int, position on y axis
-    passable - boolean, if the tile can be stepped on or not.
-    """
-    def __init__(self, row, column, passable=False):
-        self.row = row
-        self.column = column
-        self.passable = passable
-
-class Player():
-    """
-    Defines starting position and later positions of the player.
-    row - int, position on x axis
-    column - int, position on y axis
-    """
-    def __init__(self, row, column):
-        self.row = int(row)
-        self.column = int(column)
-
-    def move(self, direction):
-        if direction == "UP":
-            if self.row > 0 and self.collision("UP") == False:
-                self.row -= 1
-
-        elif direction == "LEFT":
-            if self.column > 0 and self.collision("LEFT") == False:
-                self.column -= 1
-
-        elif direction == "RIGHT":
-            if self.column < GRID_WIDTH - 1 and self.collision("RIGHT") == False:
-                self.column += 1
-
-        elif direction == "DOWN":
-            if self.row < GRID_HEIGHT - 1 and self.collision("DOWN") == False:
-                self.row += 1
-
-        level.update()
-
-    def collision(self, direction):
-        if direction == "UP":
-            pass
-        elif direction == "LEFT":
-            pass
-        elif direction == "RIGHT":
-            pass
-        elif direction == "DOWN":
-            pass
-        return False
-
-class Level():
-    grid = []
-
-    for row in range(GRID_HEIGHT):
-        grid.append([])
-        for column in range(GRID_HEIGHT):
-            grid[row].append([])
-
-    for row in range(GRID_HEIGHT):
-        for column in range(GRID_HEIGHT):
-            tile = Tile(column, row, True)
-            grid[column][row].append(tile)
-    
-    player = Player(2, 2)
-
-    def update(self):
-        pass
-
-class Game():
-    """
-    Used for loading levels of the game.
-    """
-    def __init__(self):
-        self.level = 0
-    
-    def draw_grid(self):
-        for x in range (0, WIDTH, TILESIZE):
-            pygame.draw.line(ROOT, GRAY, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pygame.draw.line(ROOT, GRAY, (0, y), (WIDTH, y))
-
-# Creating game instance
-game = Game()
-
-def beginGame():
+def beginGame(level):
     chooseDisplay(screen_game)
-    ROOT.fill(BLACK)
-    
-    game.draw_grid()
+    ann = Player(7, 8, level1)
+    level_map = createMap(level)
+    drawMap(level_map)
 
 # COMMENCING LOOP, getting key input
+logoDisplay(fpsClock)
 startMenu()
 
 while True:
@@ -267,14 +195,21 @@ while True:
 
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if menu_cursor.selection == 0:
-                beginGame()
+                beginGame(level1)
             elif menu_cursor.selection == 1:
                 tutorial()
             elif menu_cursor.selection == 2:
                 creditsMenu()
 
     elif screen_game.display == True:
-        pass
+        if KEYS[pygame.K_UP]:
+            ann.move("UP")
+        if KEYS[pygame.K_LEFT]:
+            ann.move("LEFT")
+        if KEYS[pygame.K_RIGHT]:
+            ann.move("RIGHT")
+        if KEYS[pygame.K_DOWN]:
+            ann.move("DOWN")
 
     elif screen_tutorial.display == True:
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:

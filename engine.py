@@ -1,4 +1,4 @@
-import pygame
+import pygame, sys
 from pygame.locals import *
 from settings import *
 
@@ -74,24 +74,28 @@ class Player():
                 self.push("LEFT")
                 self.row -= 1
                 drawMap(createMap(self.level))
+                win(check_win(self.level))
 
         elif direction == "UP":
             if self.can_move("UP") == True:
                 self.push("UP")
                 self.column -= 1
                 drawMap(createMap(self.level))
+                win(check_win(self.level))
 
         elif direction == "DOWN":
             if self.can_move("DOWN") == True:
                 self.push("DOWN")
                 self.column += 1
                 drawMap(createMap(self.level))
+                win(check_win(self.level))
 
         elif direction == "RIGHT":
             if self.can_move("RIGHT") == True:
                 self.push("RIGHT")
                 self.row += 1
                 drawMap(createMap(self.level))
+                win(check_win(self.level))
 
     def can_move(self, direction):
         if direction == "LEFT":
@@ -242,28 +246,44 @@ def check_win(level):
     else:
         return False
 
+def win(boolean):
+    if boolean == False:
+        pass
+    elif boolean == True:
+        prompt = pygame.font.SysFont("monospace", 48).render("Maciej pokonany!", 1, WHITE)
+        ROOT.blit(prompt, (TEXT_INDENT, 50))
+        pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
+        pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
+        line1 = pygame.font.SysFont("monospace", 32).render("Kolejny poziom: wciśnij ENTER", 1, WHITE)
+        line2 = pygame.font.SysFont("monospace", 32).render("Powrót do menu: wciśnij Z", 1, WHITE)
+        ROOT.blit(line1, (40, 205))
+        ROOT.blit(line2, (40, 245))
+
+def next_level(level):
+    pass
+
 # Starting Position
 ann = Player(7, 8, level1)
 drawMap(createMap(level1))
 
-while True:
-    pygame.time.delay(100)
+# while True:
+#     pygame.time.delay(100)
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+#     for event in pygame.event.get():
+#         if event.type == QUIT:
+#             pygame.quit()
+#             sys.exit()
 
-    KEYS = pygame.key.get_pressed()
+#     KEYS = pygame.key.get_pressed()
 
-    if KEYS[pygame.K_UP]:
-        ann.move("UP")
-    if KEYS[pygame.K_LEFT]:
-        ann.move("LEFT")
-    if KEYS[pygame.K_RIGHT]:
-        ann.move("RIGHT")
-    if KEYS[pygame.K_DOWN]:
-        ann.move("DOWN")
+#     if KEYS[pygame.K_UP]:
+#         ann.move("UP")
+#     if KEYS[pygame.K_LEFT]:
+#         ann.move("LEFT")
+#     if KEYS[pygame.K_RIGHT]:
+#         ann.move("RIGHT")
+#     if KEYS[pygame.K_DOWN]:
+#         ann.move("DOWN")
 
-    pygame.display.update()
-    fpsClock.tick(FPS)
+#     pygame.display.update()
+#     fpsClock.tick(FPS)
