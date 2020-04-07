@@ -1,46 +1,24 @@
 import pygame, sys
 from pygame.locals import *
 from settings import *
+from levels import *
 
-sprite_player = pygame.image.load('player.png')
+sprite_player = pygame.image.load('sprites\\player.png')
 sprite_player = pygame.transform.scale(sprite_player, (TILESIZE, TILESIZE))
-sprite_empty = pygame.image.load('empty.png')
+sprite_empty = pygame.image.load('sprites\\empty.png')
 sprite_empty = pygame.transform.scale(sprite_empty, (TILESIZE, TILESIZE))
-sprite_wall = pygame.image.load('wall.png')
+sprite_wall = pygame.image.load('sprites\\wall.png')
 sprite_wall = pygame.transform.scale(sprite_wall, (TILESIZE, TILESIZE))
-sprite_socket = pygame.image.load('socket.png')
+sprite_socket = pygame.image.load('sprites\\socket.png')
 sprite_socket = pygame.transform.scale(sprite_socket, (TILESIZE, TILESIZE))
-sprite_orb_unlit = pygame.image.load('orb_unlit.png')
+sprite_orb_unlit = pygame.image.load('sprites\\orb_unlit.png')
 sprite_orb_unlit = pygame.transform.scale(sprite_orb_unlit, (TILESIZE, TILESIZE))
-sprite_orb = pygame.image.load('orb.png')
+sprite_orb = pygame.image.load('sprites\\orb.png')
 sprite_orb = pygame.transform.scale(sprite_orb, (TILESIZE, TILESIZE))
 
 pygame.init()
 ROOT = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Engine")
-
-level1 = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 9, 9, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 1, 0, 2, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 9, 9, 0, 2, 1, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 1, 9, 9, 2, 0, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 0, 9, 0, 1, 0, 9, 9, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 2, 0, 3, 2, 2, 1, 9, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 1, 0, 0, 9, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-]
 
 def createMap(level):
     """
@@ -213,12 +191,16 @@ class Player():
     def get_column(self):
         return self.column
 
+    def get_level(self):
+        return self.level
+
 def drawMap(level_map):
     """
     Used to print graphical representation
     of a level map, using tiles.
     level_map - matrix, result of createMap(level)
     """
+    ROOT.fill(BLACK)
     for tile in level_map:
         coord_x = int(tile[0] * TILESIZE)
         coord_y = int(tile[1] * TILESIZE)
@@ -250,21 +232,18 @@ def win(boolean):
     if boolean == False:
         pass
     elif boolean == True:
+        chooseDisplay(screen_next)
         prompt = pygame.font.SysFont("monospace", 48).render("Maciej pokonany!", 1, WHITE)
         ROOT.blit(prompt, (TEXT_INDENT, 50))
         pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
         pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
         line1 = pygame.font.SysFont("monospace", 32).render("Kolejny poziom: wciśnij ENTER", 1, WHITE)
-        line2 = pygame.font.SysFont("monospace", 32).render("Powrót do menu: wciśnij Z", 1, WHITE)
+        line2 = pygame.font.SysFont("monospace", 32).render("Powrót do menu: wciśnij ESCAPE", 1, WHITE)
         ROOT.blit(line1, (40, 205))
         ROOT.blit(line2, (40, 245))
 
-def next_level(level):
-    pass
-
-# Starting Position
-ann = Player(7, 8, level1)
-drawMap(createMap(level1))
+# Setting up the main "ann" variable for player character
+ann = Player(0, 0, level1)
 
 # while True:
 #     pygame.time.delay(100)
