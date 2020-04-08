@@ -6,7 +6,6 @@ Made in Cracow, March - April 2020
 import pygame, sys
 from pygame.locals import *
 from settings import *
-from engine import *
 from levels import *
 
 # PYGAME Initialization
@@ -36,6 +35,20 @@ sound_intro3 = pygame.mixer.Sound('sound\\intro1.ogg')
 sound_mizer_v = pygame.mixer.Sound('sound\\mizer_v.ogg')
 sound_mizer_f = pygame.mixer.Sound('sound\\mizer_f.ogg')
 sound_magister = pygame.mixer.Sound('sound\\magister.ogg')
+
+# Sprites
+sprite_player = pygame.image.load('sprites\\player.png')
+sprite_player = pygame.transform.scale(sprite_player, (TILESIZE, TILESIZE))
+sprite_empty = pygame.image.load('sprites\\empty.png')
+sprite_empty = pygame.transform.scale(sprite_empty, (TILESIZE, TILESIZE))
+sprite_wall = pygame.image.load('sprites\\wall.png')
+sprite_wall = pygame.transform.scale(sprite_wall, (TILESIZE, TILESIZE))
+sprite_socket = pygame.image.load('sprites\\socket.png')
+sprite_socket = pygame.transform.scale(sprite_socket, (TILESIZE, TILESIZE))
+sprite_orb_unlit = pygame.image.load('sprites\\orb_unlit.png')
+sprite_orb_unlit = pygame.transform.scale(sprite_orb_unlit, (TILESIZE, TILESIZE))
+sprite_orb = pygame.image.load('sprites\\orb.png')
+sprite_orb = pygame.transform.scale(sprite_orb, (TILESIZE, TILESIZE))
 
 # Program Map
 class Screen():
@@ -86,9 +99,6 @@ class Cursor():
     """
     def __init__(self, selection):
         self.selection = selection
-
-# Setting up cursor display position
-menu_cursor = Cursor(0)
 
 def buttonDisplay():
     pygame.draw.rect(ROOT, BLACK, (50, 200, 50, 200))
@@ -215,11 +225,252 @@ def play_level(x, y, level):
     ann.level = level
     drawMap(createMap(level))
 
+def createMap(level):
+    """
+    Used to draw a level map: collection of
+    coordinates and types of tiles.
+    level - matrix, definition of a level.
+    """
+    level_map = []
+    for column in range(0, GRID_WIDTH):
+        column_raw = level[column]
+        for row in range(0, GRID_HEIGHT):
+            cell = [row, column, column_raw[row]]
+            level_map.append(cell)
+    return level_map
+
+class Player():
+    """
+    Defines starting position and later positions of the player.
+    row - int, position on x axis
+    column - int, position on y axis
+    level - matrix, level to be summoned on
+    """
+    def __init__(self, column, row, level):
+        self.row = int(row)
+        self.column = int(column)
+        self.level = level
+
+    def move(self, direction):
+        if direction == "LEFT":
+            if self.can_move("LEFT") == True:
+                self.push("LEFT")
+                self.row -= 1
+                drawMap(createMap(self.level))
+                win(check_win(self.level))
+
+        elif direction == "UP":
+            if self.can_move("UP") == True:
+                self.push("UP")
+                self.column -= 1
+                drawMap(createMap(self.level))
+                win(check_win(self.level))
+
+        elif direction == "DOWN":
+            if self.can_move("DOWN") == True:
+                self.push("DOWN")
+                self.column += 1
+                drawMap(createMap(self.level))
+                win(check_win(self.level))
+
+        elif direction == "RIGHT":
+            if self.can_move("RIGHT") == True:
+                self.push("RIGHT")
+                self.row += 1
+                drawMap(createMap(self.level))
+                win(check_win(self.level))
+
+    def can_move(self, direction):
+        if direction == "LEFT":
+            destination_x = self.get_column()
+            destination_y = self.get_row() - 1
+            pushed_x = self.get_column()
+            pushed_y = self.get_row() -2
+            if self.level[destination_x][destination_y] in (2, 3) and self.level[pushed_x][pushed_y] in (2, 3, 9):
+                return False
+            elif self.level[destination_x][destination_y] != 9:
+                return True
+            else:
+                return False
+
+        elif direction == "UP":
+            destination_x = self.get_column() - 1
+            destination_y = self.get_row()
+            pushed_x = self.get_column() - 2
+            pushed_y = self.get_row()
+            if self.level[destination_x][destination_y] in (2, 3) and self.level[pushed_x][pushed_y] in (2, 3, 9):
+                return False
+            elif self.level[destination_x][destination_y] != 9:
+                return True
+            else:
+                return False
+
+        elif direction == "DOWN":
+            destination_x = self.get_column() + 1
+            destination_y = self.get_row()
+            pushed_x = self.get_column() + 2
+            pushed_y = self.get_row()
+            if self.level[destination_x][destination_y] in (2, 3) and self.level[pushed_x][pushed_y] in (2, 3, 9):
+                return False
+            elif self.level[destination_x][destination_y] != 9:
+                return True
+            else:
+                return False
+
+        elif direction == "RIGHT":
+            destination_x = self.get_column()
+            destination_y = self.get_row() + 1
+            pushed_x = self.get_column()
+            pushed_y = self.get_row() + 2
+            if self.level[destination_x][destination_y] in (2, 3) and self.level[pushed_x][pushed_y] in (2, 3, 9):
+                return False
+            elif self.level[destination_x][destination_y] != 9:
+                return True
+            else:
+                return False
+
+    def push(self, direction):
+        if direction == "LEFT":
+            destination_x = self.get_column()
+            destination_y = self.get_row() - 1
+            pushed_x = self.get_column()
+            pushed_y = self.get_row() - 2
+            if self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 2
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 2
+
+        elif direction == "UP":
+            destination_x = self.get_column() - 1
+            destination_y = self.get_row()
+            pushed_x = self.get_column() - 2
+            pushed_y = self.get_row()
+            if self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 2
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 2
+
+        elif direction == "DOWN":
+            destination_x = self.get_column() + 1
+            destination_y = self.get_row()
+            pushed_x = self.get_column() + 2
+            pushed_y = self.get_row()
+            if self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 2
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 2
+
+        elif direction == "RIGHT":
+            destination_x = self.get_column()
+            destination_y = self.get_row() + 1
+            pushed_x = self.get_column()
+            pushed_y = self.get_row() + 2
+            if self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] == 1:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 3
+            elif self.level[destination_x][destination_y] == 2 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 0
+                self.level[pushed_x][pushed_y] = 2
+            elif self.level[destination_x][destination_y] == 3 and self.level[pushed_x][pushed_y] != 9:
+                self.level[destination_x][destination_y] = 1
+                self.level[pushed_x][pushed_y] = 2
+
+    def get_row(self):
+        return self.row
+
+    def get_column(self):
+        return self.column
+
+    def get_level(self):
+        return self.level
+
+def drawMap(level_map):
+    """
+    Used to print graphical representation
+    of a level map, using tiles.
+    level_map - matrix, result of createMap(level)
+    """
+    ROOT.fill(BLACK)
+    for tile in level_map:
+        coord_x = int(tile[0] * TILESIZE)
+        coord_y = int(tile[1] * TILESIZE)
+        if tile[2] == 0:
+            ROOT.blit(sprite_empty, (coord_x, coord_y))
+        elif tile[2] == 1:
+            ROOT.blit(sprite_socket, (coord_x, coord_y))
+        elif tile[2] == 2:
+            ROOT.blit(sprite_orb_unlit, (coord_x, coord_y))
+        elif tile[2] == 3:
+            ROOT.blit(sprite_orb, (coord_x, coord_y))
+        elif tile[2] == 9:
+            ROOT.blit(sprite_wall, (coord_x, coord_y))
+    
+    ROOT.blit(sprite_player, (ann.get_row() * TILESIZE, ann.get_column() * TILESIZE))
+
+def check_win(level):
+    unlit_orbs = 0
+    for row in level:
+        for cell in row:
+            if cell == 2:
+                unlit_orbs += 1
+    if unlit_orbs == 0:
+        return True
+    else:
+        return False
+
+def win(boolean):
+    if boolean == False:
+        pass
+    elif boolean == True:
+        chooseDisplay(screen_next)
+        prompt = pygame.font.SysFont("monospace", 48).render("Maciej pokonany!", 1, WHITE)
+        ROOT.blit(prompt, (TEXT_INDENT, 50))
+        pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
+        pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
+        line1 = pygame.font.SysFont("monospace", 32).render("Kolejny poziom: wciśnij ENTER", 1, WHITE)
+        line2 = pygame.font.SysFont("monospace", 32).render("Powrót do menu: wciśnij ESC", 1, WHITE)
+        ROOT.blit(line1, (40, 205))
+        ROOT.blit(line2, (40, 245))
+
+# Setting up cursor display position
+menu_cursor = Cursor(0)
+
+# Setting up the main "ann" variable for player character
+ann = Player(0, 0, level1)
+
 # COMMENCING LOOP, getting key input
 sound_splash.play()
 logoDisplay(fpsClock)
 pygame.mixer.music.play(-1)
 startMenu()
+
 
 
 while True:
@@ -311,7 +562,10 @@ while True:
     elif screen_next.display == True:
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if ann.get_level() == level1:
-                play_level(0, 0, level2)
+                play_level(11, 7, level2)
+            elif ann.get_level() == level2:
+                play_level(9, 6, level3)
+                # play_level(8, 5, level4)
 
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
