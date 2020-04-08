@@ -4,7 +4,7 @@ Game by Sankti Goździelewski
 Made in Cracow, March - April 2020
 """
 import pygame, sys
-from copy import copy, deepcopy
+from copy import deepcopy
 from pygame.locals import *
 from settings import *
 from levels import *
@@ -68,6 +68,27 @@ screen_campaign_menu = Screen()
 screen_intro = Screen()
 screen_next = Screen()
 screen_restart = Screen()
+screen_exit = Screen()
+
+class Level():
+    """
+    Used to navigate through levels, enables restarting.
+    play - boolean, is the screen to be displayed
+    """
+    def __init__(self, play=False):
+        self.play = play
+
+level_1 = Level()
+level_2 = Level()
+level_3 = Level()
+level_4 = Level()
+
+def chooseLevel(level):
+    level_1.play = False
+    level_2.play = False
+    level_3.play = False
+    level_4.play = False
+    level.play = True
 
 def logoDisplay(clock):
     display = True
@@ -92,6 +113,7 @@ def chooseDisplay(screen):
     screen_intro.display = False
     screen_next.display = False
     screen_restart.display = False
+    screen_exit.display = False
     screen.display = True
 
 class Cursor():
@@ -215,7 +237,7 @@ def campaignMenu():
 
     buttonDisplay()
     
-def play_level(x, y, level):
+def playLevel(x, y, level):
     """
     Executes a given level.
     x - player's starting coordinate on axis x
@@ -453,8 +475,6 @@ def win(boolean):
         pass
     elif boolean == True:
         chooseDisplay(screen_next)
-        prompt = pygame.font.SysFont("monospace", 48).render("Maciej pokonany!", 1, WHITE)
-        ROOT.blit(prompt, (TEXT_INDENT, 50))
         pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
         pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
         line1 = pygame.font.SysFont("monospace", 32).render("Kolejny poziom: wciśnij ENTER", 1, WHITE)
@@ -468,14 +488,23 @@ def restart():
     pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
     line1 = pygame.font.SysFont("monospace", 32).render("Ułożyć kule na nowo?", 1, WHITE)
     line2 = pygame.font.SysFont("monospace", 32).render("ENTER / ESC", 1, WHITE)
-    ROOT.blit(line1, (40, 205))
-    ROOT.blit(line2, (40, 245))
+    ROOT.blit(line1, (120, 205))
+    ROOT.blit(line2, (200, 245))
+
+def exitPrompt():
+    chooseDisplay(screen_exit)
+    pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
+    pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
+    line1 = pygame.font.SysFont("monospace", 32).render("Wyjść do menu głównego?", 1, WHITE)
+    line2 = pygame.font.SysFont("monospace", 32).render("ENTER / ESC", 1, WHITE)
+    ROOT.blit(line1, (110, 205))
+    ROOT.blit(line2, (200, 245))
 
 # Setting up cursor display position
 menu_cursor = Cursor(0)
 
 # Setting up the main "ann" variable for player character
-ann = Player(0, 0, level1)
+ann = Player(0, 0, level0)
 
 # COMMENCING LOOP, getting key input
 sound_splash.play()
@@ -540,7 +569,8 @@ while True:
             if menu_cursor.selection == 0:
                 tutorial()
             elif menu_cursor.selection == 1:
-                play_level(7, 8, level1)
+                chooseLevel(level_1)
+                playLevel(7, 8, level1)
             elif menu_cursor.selection == 2:
                 creditsMenu()
             
@@ -573,48 +603,46 @@ while True:
         if KEYS[pygame.K_r]:
             restart()
 
-# -------------------------------------------------- NEXT
+        if KEYS[pygame.K_ESCAPE]:
+            exitPrompt()
+
+    # -------------------------------------------------- NEXT
     elif screen_next.display == True:
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
-            if ann.get_level() == level1:
-                play_level(7, 8, level1)
-            elif ann.get_level() == level2:
-                play_level(11, 7, level2)
-            elif ann.get_level() == level3:
-                play_level(9, 6, level3)
-            elif ann.get_level() == leve4:
-                play_level(8, 5, level4)
-
-        if KEYS[pygame.K_ESCAPE]:
-            if ann.get_level() == level1:
-                play_level(ann.get_column(), ann.get_row(), ann.get_level())
-
-# -------------------------------------------------- NEXT
-    elif screen_next == True:
-        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
-            if ann.get_level() == level1:
-                play_level(11, 7, level2)
-            elif ann.get_level() == level2:
-                play_level(9, 6, level3)
+            if level_1.play == True:
+                chooseLevel(level_2)
+                playLevel(11, 7, level2)
+            elif level_2.play == True:
+                chooseLevel(level_3)
+                playLevel(9, 6, level3)
 
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
 
-# -------------------------------------------------- RESTART
+    # -------------------------------------------------- RESTART
     elif screen_restart.display == True:
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
-            if ann.get_level() == level1:
-                play_level(7, 8, level1)
-            elif ann.get_level() == level2:
-                play_level(11, 7, level2)
-            elif ann.get_level() == level3:
-                play_level(9, 6, level3)
-            elif ann.get_level() == level4:
-                play_level(8, 5, level4)
+            if level_1.play == True:
+                playLevel(7, 8, level1)
+            elif level_2.play == True:
+                playLevel(11, 7, level2)
+            elif level_3.play == True:
+                playLevel(9, 6, level3)
+            elif level_4.play == True:
+                playLevel(8, 5, level4)
 
         if KEYS[pygame.K_ESCAPE]:
-            if ann.get_level() == level1:
-                play_level(ann.get_column(), ann.get_row(), ann.get_level())
-            
+            chooseDisplay(screen_game)
+            drawMap(createMap(ann.level))
+
+    # -------------------------------------------------- EXIT
+    elif screen_exit.display == True:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+            startMenu()
+
+        if KEYS[pygame.K_ESCAPE]:
+            chooseDisplay(screen_game)
+            drawMap(createMap(ann.level))
+
     pygame.display.update()
     fpsClock.tick(FPS)
