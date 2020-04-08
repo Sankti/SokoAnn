@@ -4,6 +4,7 @@ Game by Sankti Goździelewski
 Made in Cracow, March - April 2020
 """
 import pygame, sys
+from copy import copy, deepcopy
 from pygame.locals import *
 from settings import *
 from levels import *
@@ -66,6 +67,7 @@ screen_credits = Screen()
 screen_campaign_menu = Screen()
 screen_intro = Screen()
 screen_next = Screen()
+screen_restart = Screen()
 
 def logoDisplay(clock):
     display = True
@@ -89,6 +91,7 @@ def chooseDisplay(screen):
     screen_campaign_menu.display = False
     screen_intro.display = False
     screen_next.display = False
+    screen_restart.display = False
     screen.display = True
 
 class Cursor():
@@ -222,8 +225,8 @@ def play_level(x, y, level):
     chooseDisplay(screen_game)
     ann.column = x
     ann.row = y
-    ann.level = level
-    drawMap(createMap(level))
+    ann.level = deepcopy(level)
+    drawMap(createMap(ann.level))
 
 def createMap(level):
     """
@@ -459,6 +462,15 @@ def win(boolean):
         ROOT.blit(line1, (40, 205))
         ROOT.blit(line2, (40, 245))
 
+def restart():
+    chooseDisplay(screen_restart)
+    pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
+    pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
+    line1 = pygame.font.SysFont("monospace", 32).render("Ułożyć kule na nowo?", 1, WHITE)
+    line2 = pygame.font.SysFont("monospace", 32).render("ENTER / ESC", 1, WHITE)
+    ROOT.blit(line1, (40, 205))
+    ROOT.blit(line2, (40, 245))
+
 # Setting up cursor display position
 menu_cursor = Cursor(0)
 
@@ -558,17 +570,51 @@ while True:
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
 
+        if KEYS[pygame.K_r]:
+            restart()
+
 # -------------------------------------------------- NEXT
     elif screen_next.display == True:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+            if ann.get_level() == level1:
+                play_level(7, 8, level1)
+            elif ann.get_level() == level2:
+                play_level(11, 7, level2)
+            elif ann.get_level() == level3:
+                play_level(9, 6, level3)
+            elif ann.get_level() == leve4:
+                play_level(8, 5, level4)
+
+        if KEYS[pygame.K_ESCAPE]:
+            if ann.get_level() == level1:
+                play_level(ann.get_column(), ann.get_row(), ann.get_level())
+
+# -------------------------------------------------- NEXT
+    elif screen_next == True:
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if ann.get_level() == level1:
                 play_level(11, 7, level2)
             elif ann.get_level() == level2:
                 play_level(9, 6, level3)
-                # play_level(8, 5, level4)
 
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
+
+# -------------------------------------------------- RESTART
+    elif screen_restart.display == True:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+            if ann.get_level() == level1:
+                play_level(7, 8, level1)
+            elif ann.get_level() == level2:
+                play_level(11, 7, level2)
+            elif ann.get_level() == level3:
+                play_level(9, 6, level3)
+            elif ann.get_level() == level4:
+                play_level(8, 5, level4)
+
+        if KEYS[pygame.K_ESCAPE]:
+            if ann.get_level() == level1:
+                play_level(ann.get_column(), ann.get_row(), ann.get_level())
             
     pygame.display.update()
     fpsClock.tick(FPS)
