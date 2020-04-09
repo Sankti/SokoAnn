@@ -26,6 +26,15 @@ image_rubens_full = pygame.image.load('graphics\\Rubens.png')
 image_rubens_medium = pygame.transform.scale(image_rubens_full, (100, 100))
 image_rubens = pygame.transform.scale(image_rubens_full, (30, 30))
 pygame.display.set_icon(image_rubens)
+level_art1 = pygame.image.load('graphics\\level_art1.png')
+level_art2 = pygame.image.load('graphics\\level_art2.png')
+level_art3 = pygame.image.load('graphics\\level_art3.png')
+level_art4 = pygame.image.load('graphics\\level_art4.png')
+intro_slide1 = pygame.image.load('graphics\\Pralka1.png')
+intro_slide2 = pygame.image.load('graphics\\Pralka2.png')
+intro_slide3 = pygame.image.load('graphics\\Mizer1.png')
+intro_slide4 = pygame.image.load('graphics\\Kocyk.png')
+intro_slide5 = pygame.image.load('graphics\\Ann.png')
 
 # Music & Sound Effects
 music = pygame.mixer.music.load('sound\\bez_instrukcji.ogg')
@@ -50,6 +59,8 @@ sprite_orb_unlit = pygame.image.load('sprites\\orb_unlit.png')
 sprite_orb_unlit = pygame.transform.scale(sprite_orb_unlit, (TILESIZE, TILESIZE))
 sprite_orb = pygame.image.load('sprites\\orb.png')
 sprite_orb = pygame.transform.scale(sprite_orb, (TILESIZE, TILESIZE))
+sprite_bum = pygame.image.load('sprites\\bum.png')
+sprite_bum = pygame.transform.scale(sprite_bum, (TILESIZE, TILESIZE))
 
 # Program Map
 class Screen():
@@ -73,7 +84,7 @@ screen_exit = Screen()
 class Level():
     """
     Used to navigate through levels, enables restarting.
-    play - boolean, is the screen to be displayed
+    play - boolean, is the level being played
     """
     def __init__(self, play=False):
         self.play = play
@@ -82,6 +93,10 @@ level_1 = Level()
 level_2 = Level()
 level_3 = Level()
 level_4 = Level()
+
+def intro():
+    chooseDisplay(screen_intro)
+    
 
 def chooseLevel(level):
     level_1.play = False
@@ -96,7 +111,7 @@ def logoDisplay(clock):
         start_time = pygame.time.get_ticks()
         while pygame.time.get_ticks() < start_time + 5600:
             ROOT.fill(WHITE)
-            ROOT.blit(logo, (TEXT_INDENT / 4, 50))
+            ROOT.blit(logo, (int(TEXT_INDENT / 4), 50))
             pygame.display.update()
         display = False
 
@@ -144,20 +159,16 @@ def startMenu():
     title = font_large.render("SokoAnn", 1, WHITE)
     author = font_small.render("©2020 Sankti Goździelewski", 1, WHITE)
 
-    # Buttons TO BE MADE
     button_play = font_medium.render("New Game", 1, WHITE)
     button_tutorial = font_medium.render("Tutorial", 1, WHITE)
     button_credits = font_medium.render("Credits", 1, WHITE)
-    # END
 
     ROOT.blit(title, (TEXT_INDENT, 50))
     ROOT.blit(author, (TEXT_INDENT, 100))
 
-    # Buttons TO BE MADE
     ROOT.blit(button_play, (TEXT_INDENT, 250))
     ROOT.blit(button_tutorial, (TEXT_INDENT, 300))
     ROOT.blit(button_credits, (TEXT_INDENT, 350))
-    # END
 
     buttonDisplay()
 
@@ -457,7 +468,42 @@ def drawMap(level_map):
         elif tile[2] == 9:
             ROOT.blit(sprite_wall, (coord_x, coord_y))
     
+    displayBar()
     ROOT.blit(sprite_player, (ann.get_row() * TILESIZE, ann.get_column() * TILESIZE))
+    if level_4.play == True:
+        ROOT.blit(sprite_bum, (ann.get_row() * TILESIZE, ann.get_column() * TILESIZE))
+
+def displayBar():
+    key_info1 = font_small.render("ESC: Menu", 1, WHITE)
+    key_info2 = font_small.render("R:   Restart", 1, WHITE)
+
+    if level_1.play == True:
+        level_info = font_small.render("Poziom 1 z 3", 1, WHITE)
+        ROOT.blit(level_art1, (0, 0))
+        ROOT.blit(key_info1, (int(TEXT_INDENT / 2), 20))
+        ROOT.blit(key_info2, (int(TEXT_INDENT / 2), 40))
+        ROOT.blit(level_info, (int(WIDTH - 1.5 * TEXT_INDENT), 40))
+
+    elif level_2.play == True:
+        level_info = font_small.render("Poziom 2 z 3", 1, WHITE)
+        ROOT.blit(level_art2, (0, 0))
+        ROOT.blit(key_info1, (int(TEXT_INDENT / 2), 20))
+        ROOT.blit(key_info2, (int(TEXT_INDENT / 2), 40))
+        ROOT.blit(level_info, (int(WIDTH - 1.5 * TEXT_INDENT), 40))
+
+    elif level_3.play == True:
+        level_info = font_small.render("Poziom 3 z 3", 1, WHITE)
+        ROOT.blit(level_art3, (0, 0))
+        ROOT.blit(key_info1, (int(TEXT_INDENT / 2), 20))
+        ROOT.blit(key_info2, (int(TEXT_INDENT / 2), 40))
+        ROOT.blit(level_info, (int(WIDTH - 1.5 * TEXT_INDENT), 40))
+
+    elif level_4.play == True:
+        level_info = font_small.render("POZIOM SPECJALNY", 1, WHITE)
+        ROOT.blit(level_art4, (0, 0))
+        ROOT.blit(key_info1, (int(TEXT_INDENT / 2), 20))
+        ROOT.blit(key_info2, (int(TEXT_INDENT / 2), 40))
+        ROOT.blit(level_info, (int(WIDTH - 1.5 * TEXT_INDENT), 40))
 
 def check_win(level):
     unlit_orbs = 0
@@ -567,12 +613,14 @@ while True:
 
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if menu_cursor.selection == 0:
-                tutorial()
+                intro()
             elif menu_cursor.selection == 1:
                 chooseLevel(level_1)
                 playLevel(7, 8, level1)
             elif menu_cursor.selection == 2:
-                creditsMenu()
+                chooseLevel(level_4)
+                playLevel(8, 5, level4)
+                sound_magister.play()
             
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
@@ -614,7 +662,12 @@ while True:
                 playLevel(11, 7, level2)
             elif level_2.play == True:
                 chooseLevel(level_3)
-                playLevel(9, 6, level3)
+                playLevel(11, 8, level3)
+            elif level_3.play == True:
+                creditsMenu()
+                sound_mizer_f.play()
+            elif level_4.play == True:
+                creditsMenu()
 
         if KEYS[pygame.K_ESCAPE]:
             startMenu()
@@ -627,7 +680,7 @@ while True:
             elif level_2.play == True:
                 playLevel(11, 7, level2)
             elif level_3.play == True:
-                playLevel(9, 6, level3)
+                playLevel(11, 8, level3)
             elif level_4.play == True:
                 playLevel(8, 5, level4)
 
@@ -643,6 +696,11 @@ while True:
         if KEYS[pygame.K_ESCAPE]:
             chooseDisplay(screen_game)
             drawMap(createMap(ann.level))
+
+    # -------------------------------------------------- EXIT
+    elif screen_intro.display == True:
+        if KEYS[pygame.K_ESCAPE]:
+            campaignMenu()
 
     pygame.display.update()
     fpsClock.tick(FPS)
