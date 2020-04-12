@@ -9,7 +9,7 @@ WIDTH = 640
 HEIGHT = 480
 
 # Text Indent
-TEXT_INDENT = WIDTH / 6
+TEXT_INDENT = int(WIDTH / 6)
 
 # Colours
 BLACK = (0, 0, 0)

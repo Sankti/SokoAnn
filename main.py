@@ -1,10 +1,12 @@
 """
 Game by Sankti Goździelewski
+    sanktimarus@gmail.com
     github.com/Sankti
 Made in Cracow, March - April 2020
 """
 import pygame, sys
 from copy import deepcopy
+from time import time
 from pygame.locals import *
 from settings import *
 from levels import *
@@ -35,13 +37,17 @@ intro_slide2 = pygame.image.load('graphics\\Pralka2.png')
 intro_slide3 = pygame.image.load('graphics\\Mizer1.png')
 intro_slide4 = pygame.image.load('graphics\\Kocyk.png')
 intro_slide5 = pygame.image.load('graphics\\Ann.png')
+sokoann_logo = pygame.image.load('graphics\\SokoAnn_logo.png')
 
 # Music & Sound Effects
 music = pygame.mixer.music.load('sound\\bez_instrukcji.ogg')
 sound_splash = pygame.mixer.Sound('sound\\splash.ogg')
 sound_intro1 = pygame.mixer.Sound('sound\\intro1.ogg')
-sound_intro2 = pygame.mixer.Sound('sound\\intro1.ogg')
-sound_intro3 = pygame.mixer.Sound('sound\\intro1.ogg')
+sound_intro2 = pygame.mixer.Sound('sound\\intro2.ogg')
+sound_intro3 = pygame.mixer.Sound('sound\\intro3.ogg')
+sound_intro4 = pygame.mixer.Sound('sound\\intro4.ogg')
+sound_intro5 = pygame.mixer.Sound('sound\\intro5.ogg')
+sound_intro6 = pygame.mixer.Sound('sound\\intro6.ogg')
 sound_mizer_v = pygame.mixer.Sound('sound\\mizer_v.ogg')
 sound_mizer_f = pygame.mixer.Sound('sound\\mizer_f.ogg')
 sound_magister = pygame.mixer.Sound('sound\\magister.ogg')
@@ -80,6 +86,7 @@ screen_intro = Screen()
 screen_next = Screen()
 screen_restart = Screen()
 screen_exit = Screen()
+screen_quit = Screen()
 
 class Level():
     """
@@ -94,9 +101,36 @@ level_2 = Level()
 level_3 = Level()
 level_4 = Level()
 
-def intro():
+def intro(slide):
     chooseDisplay(screen_intro)
-    
+    ROOT.fill(BLACK)
+    key_info = font_small.render("ENTER: Kontynuuj", 1, WHITE)
+    ROOT.blit(key_info, (int(TEXT_INDENT / 2), 20))
+
+    if slide == 1:
+        ROOT.blit(intro_slide1, (0, 0))
+        sound_intro1.play()
+    elif slide == 2:
+        ROOT.blit(intro_slide2, (0, 0))
+        sound_intro1.stop()
+        sound_intro2.play()
+    elif slide == 3:
+        ROOT.blit(intro_slide3, (0, 0))
+        sound_intro2.stop()
+        sound_intro3.play()
+    elif slide == 4:
+        ROOT.blit(intro_slide4, (0, 0))
+        sound_intro3.stop()
+        sound_intro4.play()
+    elif slide == 5:
+        ROOT.blit(intro_slide5, (220, 170))
+        sound_intro4.stop()
+        sound_intro5.play()
+    elif slide == 6:
+        ROOT.blit(intro_slide5, (220, 170))
+        ROOT.blit(sokoann_logo, (40, 40))
+        sound_intro5.stop()
+        sound_intro6.play()
 
 def chooseLevel(level):
     level_1.play = False
@@ -129,6 +163,7 @@ def chooseDisplay(screen):
     screen_next.display = False
     screen_restart.display = False
     screen_exit.display = False
+    screen_quit.display = False
     screen.display = True
 
 class Cursor():
@@ -159,9 +194,9 @@ def startMenu():
     title = font_large.render("SokoAnn", 1, WHITE)
     author = font_small.render("©2020 Sankti Goździelewski", 1, WHITE)
 
-    button_play = font_medium.render("New Game", 1, WHITE)
-    button_tutorial = font_medium.render("Tutorial", 1, WHITE)
-    button_credits = font_medium.render("Credits", 1, WHITE)
+    button_play = font_medium.render("Nowa gra", 1, WHITE)
+    button_tutorial = font_medium.render("Instrukcja", 1, WHITE)
+    button_credits = font_medium.render("Autorzy", 1, WHITE)
 
     ROOT.blit(title, (TEXT_INDENT, 50))
     ROOT.blit(author, (TEXT_INDENT, 100))
@@ -178,25 +213,34 @@ def tutorial():
     """
     chooseDisplay(screen_tutorial)
     ROOT.fill(BLACK)
+    key_info = font_small.render("ESC: Powrót", 1, WHITE)
+    ROOT.blit(key_info, (int(TEXT_INDENT / 2), 20))
 
-    title = font_large.render("Tutorial", 1, WHITE)
-    line0 = font_medium.render("<- Rubens", 1, WHITE)
-    line1 = font_medium.render("An evil magician has", 1, WHITE)
-    line2 = font_medium.render("kidnapped Rubens!", 1, WHITE)
-    line3 = font_medium.render("You must free him", 1, WHITE)
-    line4 = font_medium.render("before it's too late!", 1, WHITE)
-    line5 = font_small.render("Press the arrow keys and push objects until you can access Rubens.", 1, WHITE)
-    info = font_small.render("Press SPACE or ENTER to continue.", 1, WHITE)
+    title = font_large.render("Instrukcja", 1, WHITE)
+    line0 = font_small.render("Zły czarnoksiężnik Maciej porwał kocura Rubensa!", 1, WHITE)
+    line1 = font_small.render("Aby go odnaleźć i ocalić, musisz otworzyć trzy magiczne zamki.", 1, WHITE)
+    line2 = font_small.render("Zamki otwierają się za pomocą maćkowej magii.", 1, WHITE)
+    line3 = font_small.render("Fioletowe kule muszą być umieszczone na czerwonych katalizatorach many:", 1, WHITE)
+    line4 = font_small.render("", 1, WHITE)
+    line5 = font_small.render("", 1, WHITE)
+    line6 = font_small.render("SokoAnn           Kula        Katalizator many   Zapalona kula", 1, WHITE)
+    line7 = font_small.render("Kiedy wszystkie kule zostaną zapalone katalizatorami, zamek otworzy się.", 1, WHITE)
+    info = font_small.render("ENTER: Powrót", 1, WHITE)
 
     ROOT.blit(title, (TEXT_INDENT, 50))
-    ROOT.blit(image_rubens_medium, (TEXT_INDENT, 100))
-    ROOT.blit(line0, (TEXT_INDENT + 125, 125))
-    ROOT.blit(line1, (TEXT_INDENT, 200))
-    ROOT.blit(line2, (TEXT_INDENT, 225))
-    ROOT.blit(line3, (TEXT_INDENT, 250))
-    ROOT.blit(line4, (TEXT_INDENT, 275))
-    ROOT.blit(line5, (TEXT_INDENT, 325))
+    ROOT.blit(line0, (TEXT_INDENT, 150))
+    ROOT.blit(line1, (TEXT_INDENT, 170))
+    ROOT.blit(line2, (TEXT_INDENT, 190))
+    ROOT.blit(line3, (TEXT_INDENT, 210))
+    ROOT.blit(line4, (TEXT_INDENT, 230))
+    ROOT.blit(line5, (TEXT_INDENT, 250))
+    ROOT.blit(line6, (TEXT_INDENT, 270))
+    ROOT.blit(line7, (TEXT_INDENT, 290))
     ROOT.blit(info, (TEXT_INDENT, 350))
+    ROOT.blit(sprite_player, (TEXT_INDENT + 5, 230))
+    ROOT.blit(sprite_orb_unlit, (TEXT_INDENT + 125, 230))
+    ROOT.blit(sprite_socket, (TEXT_INDENT + 245, 230))
+    ROOT.blit(sprite_orb, (TEXT_INDENT + 365, 230))
 
 def creditsMenu():
     """
@@ -204,21 +248,29 @@ def creditsMenu():
     """
     chooseDisplay(screen_credits)
     ROOT.fill(BLACK)
+    key_info = font_small.render("ESC: Powrót", 1, WHITE)
+    ROOT.blit(key_info, (int(TEXT_INDENT / 2), 20))
 
-    title = font_large.render("Credits", 1, WHITE)
-    line1 = font_medium.render("Game by Sankti Goździelewski", 1, WHITE)
-    line2 = font_medium.render("", 1, WHITE)
-    line3 = font_medium.render("sanktimarus@gmail.com", 1, WHITE)
-    line4 = font_medium.render("github.com/Sankti", 1, WHITE)
-    line5 = font_small.render("", 1, WHITE)
-    info = font_small.render("Press SPACE or ENTER to continue.", 1, WHITE)
+    title = font_large.render("Autorzy", 1, WHITE)
+    line0 = font_small.render("Game by Adam Sankti Goździelewski", 1, WHITE)
+    line1 = font_small.render("        sanktimarus@gmail.com", 1, WHITE)
+    line2 = font_small.render("        github.com/Sankti", 1, WHITE)
+    line3 = font_small.render("        Kraków 2020", 1, WHITE)
+    line4 = font_small.render("Maciej Stelmaszyk jako Mroczny Mizer Maciej", 1, WHITE)
+    line5 = font_small.render("Adam Goździelewski jako narrator i Magister", 1, WHITE)
+    line6 = font_small.render("Muzyka: Kevin Nolbert & Adam Goździelewski:", 1, WHITE)
+    line7 = font_small.render("        \"Bez Instrukcji\", prod. K. Nolbert, Opole 2019", 1, WHITE)
+    info = font_small.render("ENTER: Powrót", 1, WHITE)
 
     ROOT.blit(title, (TEXT_INDENT, 50))
-    ROOT.blit(line1, (TEXT_INDENT, 200))
-    ROOT.blit(line2, (TEXT_INDENT, 225))
-    ROOT.blit(line3, (TEXT_INDENT, 250))
-    ROOT.blit(line4, (TEXT_INDENT, 275))
-    ROOT.blit(line5, (TEXT_INDENT, 325))
+    ROOT.blit(line0, (TEXT_INDENT, 150))
+    ROOT.blit(line1, (TEXT_INDENT, 170))
+    ROOT.blit(line2, (TEXT_INDENT, 190))
+    ROOT.blit(line3, (TEXT_INDENT, 210))
+    ROOT.blit(line4, (TEXT_INDENT, 230))
+    ROOT.blit(line5, (TEXT_INDENT, 250))
+    ROOT.blit(line6, (TEXT_INDENT, 270))
+    ROOT.blit(line7, (TEXT_INDENT, 290))
     ROOT.blit(info, (TEXT_INDENT, 350))
 
 def campaignMenu():
@@ -227,6 +279,8 @@ def campaignMenu():
     """
     chooseDisplay(screen_campaign_menu)
     ROOT.fill(BLACK)
+    key_info = font_small.render("ESC: Powrót", 1, WHITE)
+    ROOT.blit(key_info, (int(TEXT_INDENT / 2), 20))
     
     title = font_large.render("Wybierz Kampanię", 1, WHITE)
     author = font_small.render("", 1, WHITE)
@@ -546,20 +600,25 @@ def exitPrompt():
     ROOT.blit(line1, (110, 205))
     ROOT.blit(line2, (200, 245))
 
-# Setting up cursor display position
+def quitPrompt():
+    chooseDisplay(screen_quit)
+    pygame.draw.rect(ROOT, WHITE, (30, 195, 580, 110))
+    pygame.draw.rect(ROOT, BLACK, (35, 200, 570, 100))
+    line1 = pygame.font.SysFont("monospace", 32).render("Wyjść z gry?", 1, WHITE)
+    line2 = pygame.font.SysFont("monospace", 32).render("ENTER / ESC", 1, WHITE)
+    ROOT.blit(line1, (190, 205))
+    ROOT.blit(line2, (200, 245))
+
+# Startup Setup
 menu_cursor = Cursor(0)
-
-# Setting up the main "ann" variable for player character
 ann = Player(0, 0, level0)
-
-# COMMENCING LOOP, getting key input
 sound_splash.play()
 logoDisplay(fpsClock)
 pygame.mixer.music.play(-1)
 startMenu()
+counter = 1
 
-
-
+# Main Loop: Key Bindings Control
 while True:
     pygame.time.delay(100)
 
@@ -595,6 +654,9 @@ while True:
             elif menu_cursor.selection == 2:
                 creditsMenu()
 
+        if KEYS[pygame.K_ESCAPE]:
+            quitPrompt()
+
     # ---------------------------------------------- CAMPAIGN MENU
     elif screen_campaign_menu.display == True:
         if KEYS[pygame.K_UP]:
@@ -613,7 +675,7 @@ while True:
 
         if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
             if menu_cursor.selection == 0:
-                intro()
+                intro(1)
             elif menu_cursor.selection == 1:
                 chooseLevel(level_1)
                 playLevel(7, 8, level1)
@@ -627,12 +689,12 @@ while True:
 
     # ---------------------------------------------- TUTORIAL
     elif screen_tutorial.display == True:
-        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN] or KEYS[pygame.K_ESCAPE]:
             startMenu()
 
     # ---------------------------------------------- CREDITS
     elif screen_credits.display == True:
-        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN] or KEYS[pygame.K_ESCAPE]:
             startMenu()
 
     # ---------------------------------------------- GAME
@@ -697,10 +759,34 @@ while True:
             chooseDisplay(screen_game)
             drawMap(createMap(ann.level))
 
-    # -------------------------------------------------- EXIT
+    # -------------------------------------------------- INTRO
     elif screen_intro.display == True:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+            counter += 1
+            if counter < 7:
+                intro(counter)
+            else:
+                counter = 1
+                sound_intro6.stop()
+                campaignMenu()
+
         if KEYS[pygame.K_ESCAPE]:
+            sound_intro1.stop()
+            sound_intro2.stop()
+            sound_intro3.stop()
+            sound_intro4.stop()
+            sound_intro5.stop()
+            sound_intro6.stop()
             campaignMenu()
+
+    # -------------------------------------------------- QUIT
+    elif screen_quit.display == True:
+        if KEYS[pygame.K_SPACE] or KEYS[pygame.K_RETURN]:
+            pygame.quit()
+            sys.exit()
+
+        if KEYS[pygame.K_ESCAPE]:
+            startMenu()
 
     pygame.display.update()
     fpsClock.tick(FPS)
